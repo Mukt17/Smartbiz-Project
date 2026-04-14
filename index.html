@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartGlass Accounts</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+}
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    background: #1e293b;
+    color: white;
+    position: fixed;
+    padding-top: 20px;
+}
+.sidebar h2 {
+    text-align: center;
+}
+.sidebar a {
+    display: block;
+    color: white;
+    padding: 12px;
+    text-decoration: none;
+}
+.sidebar a:hover {
+    background: #334155;
+}
+.main {
+    margin-left: 220px;
+    padding: 20px;
+}
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+input, select, button {
+    padding: 8px;
+    margin: 5px 0;
+    width: 100%;
+}
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #1d4ed8;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background: #e2e8f0;
+}
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>SmartGlass</h2>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#inventory">Inventory</a>
+    <a href="#billing">GST Billing</a>
+    <a href="#reports">Reports</a>
+</div>
+
+<div class="main">
+
+<section id="dashboard" class="card">
+    <h2>Dashboard</h2>
+    <div class="dashboard-cards">
+        <div class="card">
+            <h3>Total Revenue</h3>
+            <p>₹ 0</p>
+        </div>
+        <div class="card">
+            <h3>Pending Payments</h3>
+            <p>₹ 0</p>
+        </div>
+        <div class="card">
+            <h3>Low Stock Items</h3>
+            <p>0 Items</p>
+        </div>
+    </div>
+    <canvas id="salesChart"></canvas>
+</section>
+
+<section id="inventory" class="card">
+    <h2>Inventory Management</h2>
+    <input type="text" placeholder="Product Name">
+    <input type="number" placeholder="Quantity">
+    <input type="number" placeholder="Price per Unit">
+    <button onclick="addProduct()">Add Product</button>
+
+    <h3>Product List</h3>
+    <table>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </tr>
+        <tr>
+            <td>Sample Glass</td>
+            <td>100</td>
+            <td>₹500</td>
+        </tr>
+    </table>
+</section>
+
+<section id="billing" class="card">
+    <h2>GST Billing System</h2>
+    <input type="text" placeholder="Customer Name">
+    <input type="text" placeholder="Product">
+    <input type="number" placeholder="Quantity">
+    <input type="number" placeholder="Price per Unit">
+    <select>
+        <option value="18">GST 18%</option>
+        <option value="12">GST 12%</option>
+        <option value="5">GST 5%</option>
+    </select>
+    <button>Generate Invoice</button>
+
+    <h3>Invoice Preview</h3>
+    <table>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>GST</th>
+            <th>Total</th>
+        </tr>
+        <tr>
+            <td>Glass Panel</td>
+            <td>10</td>
+            <td>₹500</td>
+            <td>18%</td>
+            <td>₹5900</td>
+        </tr>
+    </table>
+</section>
+
+<section id="reports" class="card">
+    <h2>Financial Reports</h2>
+    <button>Download Sales Report</button>
+    <button>Download Purchase Report</button>
+    <button>Download GST Summary</button>
+</section>
+
+</div>
+
+<script>
+const ctx = document.getElementById('salesChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{
+            label: 'Monthly Sales',
+            data: [12000, 15000, 18000, 22000, 20000],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// ✅ ADD THIS BELOW CHART CODE
+
+// Fetch products from backend
+fetch('http://localhost:5000/api/products')
+    .then(res => res.json())
+    .then(data => {
+        console.log("Products from backend:", data);
+    });
+
+// Add product function
+function addProduct() {
+    const name = document.querySelector("input[placeholder='Product Name']").value;
+    const quantity = document.querySelector("input[placeholder='Quantity']").value;
+    const price = document.querySelector("input[placeholder='Price per Unit']").value;
+
+    fetch('http://localhost:5000/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, quantity, price })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("Product Added Successfully!");
+        console.log(data);
+    });
+}
+</script>
+
+</body>
+</html>
